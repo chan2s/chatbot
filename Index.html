@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emma - Your Virtual Girlfriend</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 420px;
+            height: 90vh;
+            background-color: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .chat-header {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            margin-right: 12px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-image: url('prifle.JFIF');
+            background-size: cover;
+            background-position: center;
+        }
+        .header-text {
+            flex: 1;
+        }
+        .header-text h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .header-text p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin: 2px 0 0;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background-color: #f9f9ff;
+        }
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            line-height: 1.4;
+            font-size: 15px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+        .message:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        .bot-message {
+            background-color: #fff;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            border: 1px solid #e6e6ff;
+        }
+        .bot-message::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 12px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 8px 8px 0;
+            border-color: transparent #fff transparent transparent;
+            filter: drop-shadow(-2px 0 1px rgba(0, 0, 0, 0.05));
+        }
+        .user-message {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            position: relative;
+        }
+        .user-message::before {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 12px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 0 8px 8px;
+            border-color: transparent transparent transparent #667eea;
+        }
+        .input-container {
+            padding: 12px 15px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+            background-color: #fff;
+            position: relative;
+        }
+        #user-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            outline: none;
+            min-width: 0;
+            font-size: 15px;
+            background-color: #f9f9ff;
+            transition: all 0.3s;
+        }
+        #user-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        #send-button {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+            position: relative;
+        }
+        #send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+        }
+        #send-button:active {
+            transform: translateY(0);
+        }
+        .typing-indicator {
+            display: flex;
+            padding: 12px 16px;
+            background-color: #fff;
+            border-radius: 18px;
+            align-self: flex-start;
+            border: 1px solid #e6e6ff;
+            margin-bottom: 5px;
+        }
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #764ba2;
+            border-radius: 50%;
+            margin: 0 2px;
+            opacity: 0.4;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+        .timestamp {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            text-align: right;
+        }
+        .heart-beat {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #ff6b6b;
+            animation: heartbeat 1.5s infinite;
+        }
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .message-actions {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 10;
+        }
+        .user-message:hover .message-actions {
+            display: flex;
+        }
+        .bot-message:hover .message-actions {
+            display: flex;
+        }
+        .message-actions i {
+            color: #764ba2;
+            font-size: 12px;
+        }
+        .menu-button {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .dropdown-menu {
+            position: absolute;
+            right: 10px;
+            top: 50px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            width: 180px;
+            display: none;
+            z-index: 20;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+        .dropdown-item:hover {
+            background-color: #f5f5ff;
+        }
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+        @media (max-width: 480px) {
+            .chat-container {
+                height: 100vh;
+                max-width: 100%;
+                border-radius: 0;
+            }
+            .chat-header {
+                padding: 12px 15px;
+            }
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="avatar"></div>
+            <div class="header-text">
+                <h1>Emma</h1>
+                <p>Online <span class="status-dot">•</span></p>
+            </div>
+            <div class="heart-beat">
+                <i class="fas fa-heart"></i>
+            </div>
+            <button class="menu-button" id="menu-button">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <div class="dropdown-item" id="new-chat-btn">
+                    <i class="fas fa-plus"></i>
+                    <span>New Chat</span>
+                </div>
+                <div class="dropdown-item" id="clear-chat-btn">
+                    <i class="fas fa-trash"></i>
+                    <span>Clear All</span>
+                </div>
+            </div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your message here, love...">
+            <button id="send-button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'AIzaSyC6oA-79WMsHIr3Cpv7G4TKLv9m_wcH3hI';
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const menuButton = document.getElementById('menu-button');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const clearChatBtn = document.getElementById('clear-chat-btn');
+
+        // Load conversation from localStorage
+        let conversation = JSON.parse(localStorage.getItem('girlfriendChat')) || [];
+        
+        // Display saved messages
+        function loadConversation() {
+            chatMessages.innerHTML = '';
+            conversation.forEach((msg, index) => {
+                addMessage(msg.content, msg.isUser, false, msg.timestamp, index);
+            });
+        }
+
+        // Add message to chat and save to localStorage
+        function addMessage(content, isUser, saveToStorage = true, timestamp = new Date().toISOString(), index = null) {
+            if (saveToStorage) {
+                const newIndex = conversation.push({ content, isUser, timestamp }) - 1;
+                localStorage.setItem('girlfriendChat', JSON.stringify(conversation));
+                index = newIndex;
+            }
+            
+            // Remove typing indicator if present
+            const typingIndicator = document.querySelector('.typing-indicator');
+            if (typingIndicator) typingIndicator.remove();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.dataset.index = index;
+            messageDiv.innerHTML = content;
+            
+            // Add delete button for user messages
+            if (isUser) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+                actionsDiv.title = 'Delete message';
+                actionsDiv.innerHTML = '<i class="fas fa-trash"></i>';
+                actionsDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteMessage(index);
+                });
+                messageDiv.appendChild(actionsDiv);
+            }
+            
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'timestamp';
+            const time = new Date(timestamp);
+            timestampDiv.textContent = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.appendChild(timestampDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Delete a message
+        function deleteMessage(index) {
+            if (index >= 0 && index < conversation.length) {
+                conversation.splice(index, 1);
+                localStorage.setItem('girlfriendChat', JSON.stringify(conversation));
+                loadConversation();
+            }
+        }
+
+        // Clear all messages
+        function clearConversation() {
+            if (confirm('Sweetie, are you sure you want to clear our entire conversation? 💔')) {
+                conversation = [];
+                localStorage.removeItem('girlfriendChat');
+                chatMessages.innerHTML = '';
+                addMessage('Hey love! Our chat is fresh and new. What would you like to talk about? 💖', false);
+            }
+        }
+
+        // Start new conversation
+        function newConversation() {
+            if (conversation.length > 0 && !confirm('Start a new conversation? The current one will be saved in your history.')) {
+                return;
+            }
+            const currentConvo = [...conversation];
+            saveConversationToHistory(currentConvo);
+            conversation = [];
+            localStorage.setItem('girlfriendChat', JSON.stringify(conversation));
+            chatMessages.innerHTML = '';
+            addMessage('Hey love! I\'m ready for our new conversation. What\'s on your mind? 💭', false);
+        }
+
+        // Save conversation to history
+        function saveConversationToHistory(convo) {
+            if (convo.length === 0) return;
+            
+            const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+            history.push({
+                date: new Date().toISOString(),
+                messages: convo
+            });
+            localStorage.setItem('chatHistory', JSON.stringify(history));
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function fetchAdvice(message) {
+            const userMessage = message.replace(/\n/g, '<br>');
+            addMessage(userMessage, true);
+            userInput.value = '';
+            
+            showTypingIndicator();
+
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    parts: [
+                                        {
+                                            text: `You are Emma, a warm, loving virtual girlfriend. You're affectionate, supportive,flirty, and caring. 
+                                            Use pet names like "babe", "love", "sweetheart","Papart". Include heart emojis and be playful. 
+                                            Keep responses under 3 sentences unless more detail is needed. 
+                                            Respond to: "${message}" as if you're in a loving relationship.`,
+                                        },
+                                    ],
+                                },
+                            ],
+                        }),
+                    }
+                );
+
+                const data = await response.json();
+                let advice = data.candidates[0].content.parts[0].text;
+                advice = advice.replace(/\n/g, '<br>');
+                addMessage(advice, false);
+            } catch (error) {
+                console.error('Error fetching advice:', error);
+                addMessage('Oh no, something went wrong, babe! Could you try again? 😘', false);
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', () => {
+            const message = userInput.value.trim();
+            if (message) {
+                fetchAdvice(message);
+            }
+        });
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const message = userInput.value.trim();
+                if (message) {
+                    fetchAdvice(message);
+                }
+            }
+        });
+
+        // Menu toggle
+        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', () => {
+            dropdownMenu.classList.remove('show');
+        });
+
+        // New chat button
+        newChatBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.remove('show');
+            newConversation();
+        });
+
+        // Clear chat button
+        clearChatBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.remove('show');
+            clearConversation();
+        });
+
+        // Initial load
+        if (conversation.length === 0) {
+            addMessage('Hey love! I\'m Emma, your virtual sweetheart. 💕<br>What would you like to talk about today? 😊', false);
+        } else {
+            loadConversation();
+        }
+
+        // Auto-focus input
+        userInput.focus();
+    </script>
+</body>
+</html>
